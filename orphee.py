@@ -10,14 +10,15 @@ def selectimage():
     global filename
     global select
     filename = filedialog.askopenfilename(initialdir="~/",title="Selectionnez une image",filetypes=(("fichier jpg",'*.jpg'),("fichier jpeg",'*.jpeg'),("fichier png",'*.png')))
-    select = Label(fenetre, text="Image sélectionnée", bg = "#a7c1de")
-    select.pack(pady=20)
+    if filename != "":
+        select = Label(fenetre, text="Image sélectionnée", bg = "#a7c1de")
+        select.pack(pady=20)
     
 #fonction tableau avec des valeurs de 0.5 à 1.5 en fonction des couleurs des pixels
 def imgarray(filename):
     with PIL.Image.open(filename) as img:
         width, height = img.size
-
+    
     #calcul nombre total de pixels
     width = int(width)
     height = int(height)
@@ -62,7 +63,7 @@ def playson(tabson, ratio):
     sortie = pygame.sndarray.make_sound(resampleson)
     sortie.play()
 
-def start(filename, choixinstru, optionlist):
+def start(filename, optionlist):
     #ouvrir nouvelle fenetre avec l'image
     fenetreimage = Toplevel()
     fenetreimage.resizable(False,False)
@@ -80,6 +81,7 @@ def start(filename, choixinstru, optionlist):
     fenetreimage.update()
     
     # récupérer le fichier son correspondant
+    choixinstru=var.get()
     son = pygame.mixer.Sound(optionlist[choixinstru])
     
     # charger le son dans un tableau en fonction des fréquences
@@ -87,7 +89,7 @@ def start(filename, choixinstru, optionlist):
     valeursfiniespixels = imgarray(filename)
     for i in valeursfiniespixels:
         playson(tabson, i)
-        time.sleep(random.uniform(0.15, 0.20))
+        time.sleep(random.uniform(0.20, 0.20))
 
     #fermer fenetreimage et indicateur de sélection
     select.destroy()
@@ -96,18 +98,26 @@ def start(filename, choixinstru, optionlist):
 #configuration fenetre TKinter
 fenetre = Tk()
 fenetre.configure(bg="#1B4D7C")
-fenetre.geometry('900x500')
+fenetre.geometry('900x640')
 fenetre.title("Orphée - Projet d'ISN")
 
 label=Label(fenetre, text="Orphée", font=("Arial", 44), bg = "#a7c1de").pack(side="top", pady=30)      
-label2 = Label(fenetre, text= "Projet d'ISN 2017-2018 / Professeur : M. Elophe", font=("Arial", 22), bg="#a7c1de").pack(side=BOTTOM, padx=5, pady=20)
-optionlist = {"Piano":"piano.wav", "Violon":"violon.wav", "Guitare":"guitare.wav", "Xylophone":"xylo.wav"}
+label2 = Label(fenetre, text= "Projet d'ISN - 2017-2018 - Professeur : M. Elophe", font=("Arial", 22), bg="#a7c1de").pack(side=BOTTOM, padx=5, pady=20)
+img_fond_pil = PIL.Image.open('ressources/orphee_fond.png')
+
+img_fond_pil = img_fond_pil.resize((290, 169), PIL.Image.ANTIALIAS)
+img_fond = PIL.ImageTk.PhotoImage(img_fond_pil)
+labelimg = Label(fenetre, image=img_fond, borderwidth=0).pack()
+
+global var
+optionlist = {"Piano":"ressources/piano.wav", "Violon":"ressources/violon.wav", "Guitare":"ressources/guitare.wav"}
 var = StringVar(fenetre)
 var.set("Piano")
-option = OptionMenu(fenetre, var, "Piano", "Violon", "Guitare", "Xylophone")
+option = OptionMenu(fenetre, var, "Piano", "Violon", "Guitare")
 option["bg"] = "#1B4D7C"
 option.pack(pady=20)
-choixinstru=var.get()
+
+
 
 
 #bouton activant fonction selectimage
@@ -117,6 +127,6 @@ boutonfichier.pack(pady=20)
 
 #initiation du module pygame
 pygame.mixer.init(44100,-16,2,4096)
-       
-boutondebut = Button(fenetre, text="Démarrer", command=lambda:start(filename, choixinstru, optionlist), highlightbackground= "#1B4D7C").pack(pady=20)
+
+boutondebut = Button(fenetre, text="Démarrer", command=lambda:start(filename, optionlist), highlightbackground= "#1B4D7C").pack(pady=20)
 
